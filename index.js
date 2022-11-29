@@ -2,6 +2,7 @@
 require('dotenv').config();
 const { log } = require('./logger');
 const redis = require('redis');
+const { getSystemIpAddress } = require('./sql/qf-provider');
 
 const onBoot = async () => {
    log('info', 'NA', 'NA', 'onBoot', `FN CALL`, {
@@ -22,10 +23,10 @@ const onBoot = async () => {
 
    redisClient.on(
       'error',
-      async (err) =>
+      async (error) =>
          await log('error', 'NA', 'NA', 'redisClient', `ON ERROR`, {
             // TODO: KILL APP?
-            error: err,
+            error: error,
          })
    );
    await redisClient.connect();
@@ -41,9 +42,23 @@ const onBoot = async () => {
       await log('info', 'uuid', 'sme', 'redisClient', 'FN DETAILS', {
          reading: reading,
       });
-   } catch (err) {
+   } catch (error) {
       await log('error', 'uuid', 'sme', 'redisClient', 'FN CATCH', {
-         error: err,
+         error: error,
+      });
+   }
+
+   // PG I/O EXAMPLE VIA QUERY FILE
+   try {
+      // GET IP_ADDRESS OF SOME SYSTEM
+      const sme = ['SME13571'];
+      const ipAddress = await getSystemIpAddress('uuid', sme);
+      await log('info', 'uuid', 'sme', 'pgPromise', 'FN DETAILS', {
+         ipAddress: ipAddress,
+      });
+   } catch (error) {
+      await log('error', 'uuid', 'sme', 'pgPromise', 'FN CATCH', {
+         error: error,
       });
    }
 };

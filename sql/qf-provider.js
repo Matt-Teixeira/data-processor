@@ -9,9 +9,9 @@ const logQf = async (uuid, fn, qfArgs) => {
    });
 };
 
-const getSystemIpAddress = async (uuid, systemId) => {
-   await logQf(uuid, 'getSystemIpAddress', systemId);
-   return db.any(system.ipAddress, systemId);
+const getSystemIpAddress = async (uuid, sme) => {
+   await logQf(uuid, 'getSystemIpAddress', sme);
+   return db.any(system.ipAddress, sme);
 };
 
 module.exports = { getSystemIpAddress };
