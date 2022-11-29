@@ -4,8 +4,6 @@ const { combine, timestamp, printf } = format;
 const customFormat = printf(({ level, timestamp, message }) => {
    const { text, jobId } = message;
    let msg = `[${level.toUpperCase()} - ${jobId}]\n[${timestamp}]\n${text}\n[/${level.toUpperCase()} - ${jobId}]\n`;
-
-   // POSSIBLE FUTURE FORMAT WITH CLOSING BLOCK THAT REFERENCES JOB ID
    return msg;
 });
 
@@ -39,13 +37,18 @@ const getConstructorType = async (value) => {
          return 'array';
       case Object:
          return 'object';
+      // NEVER SEEN THESE FIRE YET
+      case Function:
+         return 'function';
+      case Error:
+         return 'error';
       default:
-         return value.constructor;
+         return 'Undetermined Type: Manual Check For Future Reference';
    }
 };
 
 const log = async (level, jobId, sme, fn, note, args) => {
-   let message = `[${sme} - ${fn} - ${note}]`;
+   let message = `[${fn} - ${note}]`;
 
    // args -> [{},{}...]
    // LOOP THROUGH ARGS SO WE CAN LOG THE ARG NAME, TYPE AND VALUE
@@ -64,16 +67,27 @@ const log = async (level, jobId, sme, fn, note, args) => {
                argType = await getConstructorType(value);
          }
 
-         // STRINGFY object OR array FOR MORE INFORMATIVE LOGGING
-         argInfo =
-            argInfo +
-            `\n[${key}] - [${argType}] - [${
-               argType === 'object'
-                  ? JSON.stringify(value)
-                  : argType === 'array'
-                  ? JSON.stringify(value)
-                  : value
+         // CHECK FOR error.stack FOR MORE INFORMATIVE LOGGING
+         // TODO: MABYE CONVERT IF/ELSE TO IF->BREAK LOOP, THIS BECASUE
+         // args DOESN'T NEED LOOPING IF Error IS DETECTED, I THINK???
+         if (argType === 'error') {
+            // IF ERROR HAS STACKTRACE PRINT THAT, OTHERWISE STANDARD PRINT
+            // IF FN THROWS args WILL ONLY CONTAIN 1 ITEM, AN error OBJECT
+            argInfo = `\n[${key}] - [${argType}] - [${
+               value.stack ? value.stack : value
             }]`;
+         } else {
+            // STRINGFY object OR array FOR MORE INFORMATIVE LOGGING
+            argInfo =
+               argInfo +
+               `\n[${key}] - [${argType}] - [${
+                  argType === 'object'
+                     ? JSON.stringify(value)
+                     : argType === 'array'
+                     ? JSON.stringify(value)
+                     : value
+               }]`;
+         }
       }
 
       message = message + argInfo;

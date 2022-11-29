@@ -4,7 +4,7 @@ const { system } = require('./sql');
 
 // GENERIC LOGGER FOR ANY QF CALL
 const logQf = async (uuid, fn, qfArgs) => {
-   await log('info', uuid, fn, `FN CALL`, {
+   await log('info', uuid, 'sme', fn, `FN CALL`, {
       qfArgs: qfArgs,
    });
 };

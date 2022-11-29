@@ -34,7 +34,7 @@ const onBoot = async () => {
    // REDIS I/O EXAMPLE
    try {
       // WRITE
-      const key = `SME123_temp`;
+      const key = 'SME123_temp';
       const value = '32F';
       await redisClient.set(key, value);
       // READ
