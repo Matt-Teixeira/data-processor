@@ -9,7 +9,7 @@ const config = {
    password: process.env.PG_PW,
    ssl: {
       require: true,
-      cert: fs.readFileSync(process.env.PG_SSL_PATH),
+      cert: fs.readFileSync(`./db/BaltimoreCyberTrustRoot.crt.pem`),
       rejectUnauthorized: true,
    },
 };
