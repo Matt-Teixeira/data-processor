@@ -6,8 +6,9 @@ const {
   getSystemIpAddress,
   getSystemData,
   getPgTable,
+  updateDateTime,
 } = require("./sql/qf-provider");
-const processDateTime = require("./processing/date_processing/process-dt")
+const processDateTime = require("./processing/date_processing/process-dt");
 
 const onBoot = async () => {
   log("info", "NA", "NA", "onBoot", `FN CALL`, {
@@ -16,6 +17,13 @@ const onBoot = async () => {
     PG_USER: process.env.PG_USER,
     PG_DB: process.env.PG_DB,
   });
+
+  table_keys = {
+    mmb_siemens_non_tim: 'mmb.siemens_non_tim',
+    mmb_siemens: 'mmb.siemens',
+    mmb_ge_mm3: 'mmb.ge_mm3',
+    mmb_ge_mm4: 'mmb.ge_mm4'
+  }
 
   // SETUP ENV BASED RESOURCES -> REDIS CLIENT, JOB SCHEDULES
   const clienConfig = {
@@ -38,37 +46,50 @@ const onBoot = async () => {
 
   // REDIS I/O EXAMPLE
   try {
-   await log("info", "uuid", "sme", "redisClient", "FN DETAILS", {
-      reading: reading,
-    });
-
     const key = "dp:queue";
-    const queueLength = await redisClient.sendCommand(["LLEN", key])
-    console.log(queueLength)
+    const queueLength = await redisClient.sendCommand(["LLEN", key]);
+    console.log(queueLength);
 
+    for (let i = 0; i < queueLength; i++) {
+      const reading = await redisClient.sendCommand(["RPOP", key]);
 
-    
-    const reading = await redisClient.sendCommand(["RPOP", key]);
+      await log("info", "uuid", "sme", "redisClient", "FN DETAILS", {
+        reading: reading,
+      });
 
-    // If data processing fails, push to head of list
-    await redisClient.sendCommand(["RPUSH", key, reading]);
+      /**** PROCESS DATA ****/
 
+      const queueData = await JSON.parse(reading);
+      console.log(queueData);
+
+      const dtObject = await processDateTime(
+        "123",
+        queueData.system_id,
+        queueData.pg_table,
+        queueData.host_date,
+        queueData.host_time
+      );
+
+      let returnedData = await updateDateTime("456", [
+        table_keys[queueData.pg_table],
+        dtObject,
+        queueData.system_id,
+        queueData.host_date,
+        queueData.host_time,
+      ]);
+
+      console.log(returnedData);
+      if (!returnedData) {
+        // If data processing fails, push to head of list
+        await redisClient.sendCommand(["RPUSH", key, reading]);
+      }
+    }
     /**** PROCESS DATA ****/
-
-    const queueData = await JSON.parse(reading)
-    console.log(queueData);
-
-    const dtObject = await processDateTime("123", queueData.system_id, queueData.pg_table, queueData.host_date, queueData.host_time);
-    console.log(dtObject);
-
-
-    /**** PROCESS DATA ****/
-
-    
 
     await redisClient.quit();
   } catch (error) {
-   console.log(error)
+    await redisClient.quit();
+    console.log(error);
     await log("error", "uuid", "sme", "redisClient", "FN CATCH", {
       error: error,
     });

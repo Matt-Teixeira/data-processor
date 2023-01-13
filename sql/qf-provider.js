@@ -1,6 +1,6 @@
 const db = require("../db/pgPool");
 const { log } = require("../logger");
-const { system_ip, system_data, pg_table } = require("./sql");
+const { system_ip, system_data, pg_table, update_date_time } = require("./sql");
 
 // GENERIC LOGGER FOR ANY QF CALL
 const logQf = async (uuid, fn, qfArgs) => {
@@ -24,4 +24,17 @@ const getPgTable = async (uuid, sme) => {
   return db.one(pg_table.smeNumber, sme);
 };
 
-module.exports = { getSystemIpAddress, getSystemData, getPgTable };
+const updateDateTime = async (uuid, argsArray) => {
+  try {
+    await logQf(uuid, "updateDateTime", argsArray[2], {
+      args: argsArray
+    });
+    return db.any(update_date_time.dateTime, argsArray);
+  } catch (error) {
+    await log("error", uuid, argsArray[2], 'updateDateTime', `FN CALL`);
+  }
+}
+
+
+
+module.exports = { getSystemIpAddress, getSystemData, getPgTable, updateDateTime };

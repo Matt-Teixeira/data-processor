@@ -6,7 +6,7 @@ async function processDateTime(jobId, sme, pgTable, hostDate, hostTime) {
     await log("info", jobId, sme, "processDateTime", "FN CALLED", null);
     let date;
     switch (pgTable) {
-      case "mmb.ge_mm4":
+      case "mmb_ge_mm4":
         date = await generateDateTimeObject(
           jobId,
           sme,
@@ -20,9 +20,27 @@ async function processDateTime(jobId, sme, pgTable, hostDate, hostTime) {
           jobId,
           sme,
           `${hostDate}${hostTime}`,
-          'dd-MMM-yyyyHH:mm:ss',
-          'America/New_York'
-       );
+          "dd-MMM-yyyyHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+      case "mmb_siemens":
+        date = await generateDateTimeObject(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MMM-yyyyHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+        case "mmb_ge_mm3":
+        date = await generateDateTimeObject(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MMM-yyyyHH:mm",
+          "America/New_York"
+        );
         break;
       default:
         break;

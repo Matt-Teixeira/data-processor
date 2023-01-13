@@ -17,4 +17,7 @@ module.exports = {
   pg_table: {
     smeNumber: sql("system/getPgTable.sql"),
   },
+  update_date_time: {
+    dateTime: sql("system/updateDateTime.sql"),
+  },
 };
