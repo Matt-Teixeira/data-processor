@@ -1,13 +1,13 @@
 const { log } = require("../../logger");
-const generateDateTimeObject = require("./generate-dt-object");
+const dateTimeTemplate = require("./dateTimeTemplate");
 
-async function processDateTime(jobId, sme, pgTable, hostDate, hostTime) {
+async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
   try {
-    await log("info", jobId, sme, "processDateTime", "FN CALLED", null);
+    await log("info", jobId, sme, "generateDateTime", "FN CALLED", null);
     let date;
     switch (pgTable) {
-      case "mmb_ge_mm4":
-        date = await generateDateTimeObject(
+      case "mmb.ge_mm4":
+        date = await dateTimeTemplate(
           jobId,
           sme,
           `${hostDate}${hostTime}`,
@@ -15,8 +15,8 @@ async function processDateTime(jobId, sme, pgTable, hostDate, hostTime) {
           "America/New_York"
         );
         break;
-      case "mmb_siemens_non_tim":
-        date = await generateDateTimeObject(
+      case "mmb.siemens_non_tim":
+        date = await dateTimeTemplate(
           jobId,
           sme,
           `${hostDate}${hostTime}`,
@@ -24,21 +24,21 @@ async function processDateTime(jobId, sme, pgTable, hostDate, hostTime) {
           "America/New_York"
         );
         break;
-      case "mmb_siemens":
-        date = await generateDateTimeObject(
+      case "mmb.siemens":
+        date = await dateTimeTemplate(
           jobId,
           sme,
           `${hostDate}${hostTime}`,
-          "dd-MMM-yyyyHH:mm:ss",
+          "dd-MMM-yyHH:mm:ss",
           "America/New_York"
         );
         break;
-        case "mmb_ge_mm3":
-        date = await generateDateTimeObject(
+        case "mmb.ge_mm3":
+        date = await dateTimeTemplate(
           jobId,
           sme,
           `${hostDate}${hostTime}`,
-          "dd-MMM-yyyyHH:mm",
+          "dd-MMM-yyHH:mm",
           "America/New_York"
         );
         break;
@@ -47,10 +47,10 @@ async function processDateTime(jobId, sme, pgTable, hostDate, hostTime) {
     }
     return date;
   } catch (error) {
-    await log("error", jobId, sme, "processDateTime", "FN CATCH", {
+    await log("error", jobId, sme, "generateDateTime", "FN CATCH", {
       error: error,
     });
   }
 }
 
-module.exports = processDateTime;
+module.exports = generateDateTime;

@@ -1,14 +1,14 @@
 const { log } = require("../../logger");
 const { DateTime } = require("luxon");
 
-const generateDateTimeObject = async (
+const dateTimeTemplate = async (
   jobId,
   sme,
   dtString,
   inputPattern,
   ianaTz
 ) => {
-  await log("info", jobId, sme, "generateDateTimeObject", "FN CALLED", {
+  await log("info", jobId, sme, "dateTimeTemplate", "FN CALLED", {
     dtString: dtString,
     inputPattern: inputPattern,
     ianaTz: ianaTz,
@@ -19,4 +19,4 @@ const generateDateTimeObject = async (
   }).toISO();
 };
 
-module.exports = generateDateTimeObject;
+module.exports = dateTimeTemplate;
