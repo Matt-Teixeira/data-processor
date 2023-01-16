@@ -1,8 +1,11 @@
 ("use strict");
 require("dotenv").config();
 const { log } = require("./logger");
-const redis = require("redis");
-const processDateTimes = require("./processing/date_processing/processDateTimes");
+const initRedis = require("./redis");
+const {
+  processDateTimes,
+  test,
+} = require("./processing/date_processing/processDateTimes");
 
 const onBoot = async () => {
   log("info", "NA", "NA", "onBoot", `FN CALL`, {
@@ -12,33 +15,15 @@ const onBoot = async () => {
     PG_DB: process.env.PG_DB,
   });
 
-  // SETUP ENV BASED RESOURCES -> REDIS CLIENT, JOB SCHEDULES
-  const clienConfig = {
-    socket: {
-      port: 6379,
-      host: process.env.REDIS_IP,
-    },
-  };
-
-  const redisClient = redis.createClient(clienConfig);
-
   try {
-    redisClient.on(
-      "error",
-      async (error) =>
-        await log("error", "NA", "NA", "redisClient", `ON ERROR`, {
-          // TODO: KILL APP?
-          error: error,
-        })
-    );
-
-    await redisClient.connect();
+    const redisClient = await initRedis(6379, process.env.REDIS_IP);
 
     console.time();
     await processDateTimes(redisClient);
     console.timeEnd();
-    
+
   } catch (error) {
+    await redisClient.quite();
     await log("error", "NA", "NA", "redisClient", `ON ERROR`, {
       error: error,
     });
