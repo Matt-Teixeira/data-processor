@@ -6,7 +6,7 @@ async function initRedis(PORT, REDIS_IP) {
   // SETUP ENV BASED RESOURCES -> REDIS CLIENT, JOB SCHEDULES
   const clienConfig = {
     socket: {
-      port: 6379,
+      port: PORT,
       host: REDIS_IP,
     },
   };

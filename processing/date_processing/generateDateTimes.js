@@ -42,6 +42,70 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
           "America/New_York"
         );
         break;
+        //HHM
+        case "log.ge_ct_gesys":
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MMM-yyyyHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+        case "log.ge_mri_gesys":
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MMM-yyyyHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+        case 'log.ge_cv_syserror':
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MMM-yyyyHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+        case 'log.philips_cv_eventlog':
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "yyyy-MM-ddHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+        case 'log.siemens_ct':
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "yyyy-MM-ddHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+        case 'log.siemens_cv':
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MMM-yyyyHH:mm:ss",
+          "America/New_York"
+        );
+        break;
+        case 'log.siemens_mri':
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "yyyy-MM-ddHH:mm:ss",
+          "America/New_York"
+        );
+        break;
       default:
         break;
     }

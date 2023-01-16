@@ -18,38 +18,59 @@ async function processDateTimes(redisClient) {
     for (let i = 0; i < queueLength; i++) {
       const reading = await redisClient.sendCommand(["RPOP", key]);
 
+      // Place back in queue: if error, will not lose data.
+      await redisClient.sendCommand(["LPUSH", key, reading]);
+
       await log("info", "uuid", "sme", "processDateTimes", "FN DETAILS", {
         reading: reading,
       });
 
-      await redisClient.sendCommand(["LPUSH", key, reading]);
+      //await redisClient.sendCommand(["LPUSH", key, reading]);
 
       /**** PROCESS DATE ****/
 
       const queueData = await JSON.parse(reading);
 
+      let prev_date = "";
+      let prev_time = "";
+      let current_date = queueData.host_date;
+      let current_time = queueData.host_time;
+
+      if (current_date === prev_date && current_time === prev_time) {
+        await redisClient.sendCommand(["LPOP", key]);
+        continue;
+      }
+
+      prev_date = current_date;
+      prev_time = current_time;
+
       const dtObject = await generateDateTime(
         "uuid",
         queueData.system_id,
-        table_keys[queueData.pg_table],
+        queueData.pg_table,
         queueData.host_date,
         queueData.host_time
       );
 
+      if (dtObject === null || dtObject === undefined) {
+        await log("warn", "uuid", "sme", "processDateTimes", "FN DETAILS", {
+          message: "date_time object was null/undefined",
+        });
+        continue;
+      }
+
       const updatedDb = await updateDateTime("TEST", [
-        table_keys[queueData.pg_table],
+        queueData.pg_table, //table_keys[queueData.pg_table]
         dtObject,
         queueData.system_id,
         queueData.host_date,
         queueData.host_time,
       ]);
 
-      // console.log(updatedDb);
-
-      if (!updatedDb) {
-        console.log("NOTHING RETURNED");
-        // If data processing fails, push to head of list
-        await redisClient.sendCommand(["LPUSH", key, reading]);
+      if (updatedDb) {
+        // If data processing completes, remove reading from head of list
+        // console.log("LPOPPING");
+        await redisClient.sendCommand(["LPOP", key]);
       }
     }
     /**** PROCESS DATE ****/
